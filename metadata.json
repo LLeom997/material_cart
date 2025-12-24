@@ -1,0 +1,7 @@
+{
+  "name": "MaterialCart Sangli",
+  "description": "High-conversion hyper-local construction material marketplace for Sangli District builders and contractors.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
