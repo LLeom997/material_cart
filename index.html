@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MaterialCart - Professional Construction Marketplace</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         theme: {
@@ -14,16 +14,18 @@
               brand: {
                 50: '#f9fafb',
                 100: '#f3f4f6',
-                500: '#f59e0b', // Refined Amber
+                500: '#f59e0b',
                 600: '#d97706',
-                900: '#0f172a', // Slate 900
+                900: '#0f172a',
               },
-              accent: '#e11d48', // Rose 600
-              surface: '#ffffff'
+              accent: '#e11d48',
+              surface: '#ffffff',
+              ikeaBlue: '#0058a3',
+              ikeaYellow: '#ffdb00'
             },
             fontFamily: {
-              sans: ['Inter', 'ui-sans-serif', 'system-ui'],
-              display: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+              sans: ['Plus Jakarta Sans', 'ui-sans-serif', 'system-ui'],
+              display: ['Plus Jakarta Sans', 'sans-serif'],
             },
           }
         }
@@ -31,60 +33,86 @@
     </script>
     <style>
       body { 
-        background-color: #f9fafb;
+        background-color: #ffffff;
         -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        font-family: 'Inter', sans-serif;
-      }
-      h1, h2, h3, h4, .font-display {
         font-family: 'Plus Jakarta Sans', sans-serif;
       }
+      .font-display { font-family: 'Plus Jakarta Sans', sans-serif; }
+      
+      /* Accessibility: Visible Focus Rings */
+      :focus-visible {
+        outline: 3px solid #f59e0b;
+        outline-offset: 2px;
+      }
+
       .custom-scrollbar::-webkit-scrollbar { width: 6px; }
       .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
       .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
       
-      @keyframes slideInUp {
-        from { transform: translateY(16px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-      }
+      @keyframes slideInUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
       .animate-slideInUp { animation: slideInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
       
-      @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-      }
-      .animate-fadeIn { animation: fadeIn 0.4s ease-out forwards; }
+      @keyframes slideInLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+      .animate-slideInLeft { animation: slideInLeft 0.3s ease-out forwards; }
+
+      @keyframes fadeIn { from { opacity: 0; } to { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+      .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+
+      @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+      .animate-pulse-subtle { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
 
       .full-width-container {
         width: 100%;
         max-width: 1440px;
         margin-left: auto;
         margin-right: auto;
-        padding-left: 1rem;
-        padding-right: 1rem;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
       }
-      @media (min-width: 1024px) {
-        .full-width-container {
-          padding-left: 2rem;
-          padding-right: 2rem;
-        }
+
+      .skip-link {
+        position: absolute;
+        top: -40px;
+        left: 0;
+        background: #0f172a;
+        color: white;
+        padding: 8px;
+        z-index: 100;
+        transition: top 0.2s;
+      }
+      .skip-link:focus {
+        top: 0;
+      }
+
+      /* IKEA style specific tweaks */
+      .ikea-card-title {
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: -0.02em;
+        font-size: 1.125rem;
+      }
+      .ikea-price {
+        font-weight: 800;
+        color: #e11d48;
+        letter-spacing: -0.05em;
       }
     </style>
-    <script type="importmap">
+  <script type="importmap">
 {
   "imports": {
     "react/": "https://esm.sh/react@^19.2.3/",
     "react": "https://esm.sh/react@^19.2.3",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.89.0",
     "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react-router-dom": "https://esm.sh/react-router-dom@^7.11.0",
-    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.45.4"
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.11.0"
   }
 }
 </script>
-  <link rel="stylesheet" href="/index.css">
+<link rel="stylesheet" href="/index.css">
 </head>
   <body class="text-brand-900 overflow-x-hidden selection:bg-brand-500/30">
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
 </body>

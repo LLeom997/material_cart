@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import * as reactRouterDom from 'react-router-dom';
 const { useNavigate, useLocation } = reactRouterDom as any;
-import { ShieldCheck, Mail, Lock, ArrowRight, Loader2, UserPlus, LogIn } from 'lucide-react';
+import { ShieldCheck, Mail, Lock, Loader2, UserPlus, LogIn, HardHat, Building2 } from 'lucide-react';
 
 const AuthPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -11,76 +12,92 @@ const AuthPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from || '/';
 
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAuth = async (e?: React.FormEvent, customEmail?: string, customPass?: string) => {
+    e?.preventDefault();
     setIsLoading(true);
     
+    const targetEmail = customEmail || email;
+    const targetPass = customPass || password;
+
     const { data, error } = isLogin 
-      ? await supabase.auth.signInWithPassword({ email, password })
-      : await supabase.auth.signUp({ email, password });
+      ? await supabase.auth.signInWithPassword({ email: targetEmail, password: targetPass })
+      : await supabase.auth.signUp({ email: targetEmail, password: targetPass });
 
     setIsLoading(false);
 
     if (error) {
       alert(error.message);
     } else if (data.user) {
-      navigate(from, { replace: true });
+      const isAdmin = targetEmail.includes('admin');
+      if (isAdmin) {
+        navigate('/admin', { replace: true });
+      } else {
+        const from = location.state?.from || '/listing';
+        navigate(from, { replace: true });
+      }
+    }
+  };
+
+  const quickLogin = (type: 'admin' | 'customer') => {
+    if (type === 'admin') {
+      handleAuth(undefined, 'admin@materialcart.com', 'admin123');
+    } else {
+      handleAuth(undefined, 'site.manager@sangli.com', 'manager123');
     }
   };
 
   return (
-    <div className="min-h-screen bg-brand-50 flex items-center justify-center p-6 font-sans">
-      <div className="w-full max-w-xl animate-fadeIn">
-        <div className="text-center mb-16">
-          <div className="w-16 h-16 bg-slate-900 rounded-[1.25rem] flex items-center justify-center text-brand-500 mx-auto mb-8 shadow-2xl">
-            <ShieldCheck size={36} strokeWidth={2.5} />
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+      <div className="w-full max-w-md animate-fadeIn">
+        <div className="text-center mb-10">
+          <div className="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center text-brand-500 mx-auto mb-6">
+            <ShieldCheck size={28} strokeWidth={2.5} />
           </div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tighter uppercase font-display mb-4">Site Manager Access</h1>
-          <p className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.3em]">MaterialCart Sourcing Passport</p>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight mb-1 uppercase">Supply Portal</h1>
+          <p className="text-gray-400 font-bold text-[10px] uppercase tracking-widest">Authenticated Access Only</p>
         </div>
 
-        <div className="bg-white p-10 md:p-14 rounded-[4rem] border border-slate-200 shadow-[0_64px_128px_-32px_rgba(0,0,0,0.1)]">
-          <div className="flex p-1.5 bg-slate-50 rounded-2xl mb-12 border border-slate-100">
+        <div className="bg-white p-8 md:p-10 rounded-[2.5rem] border border-gray-100 shadow-xl">
+          <div className="flex p-1 bg-gray-50 rounded-xl mb-8">
              <button 
               onClick={() => setIsLogin(true)}
-              className={`flex-1 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all ${isLogin ? 'bg-white text-slate-900 shadow-md' : 'text-slate-400'}`}
+              className={`flex-1 py-3 rounded-lg font-bold text-[10px] uppercase tracking-widest transition-all ${isLogin ? 'bg-white text-slate-900 shadow-sm' : 'text-gray-400'}`}
              >
-               Login
+               Sign In
              </button>
              <button 
               onClick={() => setIsLogin(false)}
-              className={`flex-1 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all ${!isLogin ? 'bg-white text-slate-900 shadow-md' : 'text-slate-400'}`}
+              className={`flex-1 py-3 rounded-lg font-bold text-[10px] uppercase tracking-widest transition-all ${!isLogin ? 'bg-white text-slate-900 shadow-sm' : 'text-gray-400'}`}
              >
                Register
              </button>
           </div>
 
-          <form onSubmit={handleAuth} className="space-y-8">
-            <div className="space-y-6">
-              <div className="space-y-2.5">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email Coordinates</label>
-                <div className="relative group">
-                  <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-brand-500 transition-colors" size={20} />
+          <form onSubmit={(e) => handleAuth(e)} className="space-y-6">
+            <div className="space-y-4">
+              <div>
+                <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1 block">Account Email</label>
+                <div className="relative">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
                   <input 
                     required
                     type="email" 
-                    className="w-full pl-14 pr-6 py-5 rounded-2xl border bg-slate-50/50 outline-none focus:ring-4 focus:ring-brand-500/10 focus:bg-white focus:border-brand-500 transition-all font-bold text-sm"
-                    placeholder="project@site.com"
+                    className="w-full pl-11 pr-4 py-3 rounded-xl border bg-gray-50 outline-none focus:bg-white focus:border-brand-500 transition-all font-bold text-xs"
+                    placeholder="name@company.com"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                   />
                 </div>
               </div>
-              <div className="space-y-2.5">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Access Key</label>
-                <div className="relative group">
-                  <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-brand-500 transition-colors" size={20} />
+              <div>
+                <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1 block">Secure Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
                   <input 
                     required
                     type="password" 
-                    className="w-full pl-14 pr-6 py-5 rounded-2xl border bg-slate-50/50 outline-none focus:ring-4 focus:ring-brand-500/10 focus:bg-white focus:border-brand-500 transition-all font-bold text-sm"
+                    className="w-full pl-11 pr-4 py-3 rounded-xl border bg-gray-50 outline-none focus:bg-white focus:border-brand-500 transition-all font-bold text-xs"
                     placeholder="••••••••"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
@@ -92,21 +109,30 @@ const AuthPage: React.FC = () => {
             <button 
               type="submit"
               disabled={isLoading}
-              className="w-full bg-slate-900 text-white py-6 rounded-[2rem] font-black uppercase tracking-[0.3em] text-[11px] flex items-center justify-center gap-4 hover:bg-brand-500 hover:text-slate-900 transition-all shadow-2xl active:scale-[0.98] disabled:opacity-50"
+              className="w-full bg-slate-900 text-white py-4 rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 shadow-lg active:scale-95 disabled:opacity-50"
             >
-              {isLoading ? <Loader2 className="animate-spin" /> : (isLogin ? <LogIn size={20}/> : <UserPlus size={20}/>)}
-              {isLogin ? 'VERIFY ACCESS' : 'CREATE PASSPORT'}
+              {isLoading ? <Loader2 className="animate-spin" size={16} /> : (isLogin ? <LogIn size={16}/> : <UserPlus size={16}/>)}
+              {isLogin ? 'Authenticate' : 'Register Account'}
             </button>
           </form>
 
-          <div className="mt-12 pt-10 border-t border-slate-50 flex flex-col items-center gap-6">
-             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center opacity-70">
-               Secured by MaterialCart Protocol<br/>Region: Sangli SMK Cluster
-             </p>
-             <div className="flex gap-4 opacity-20">
-               <ShieldCheck size={20} />
-               <div className="h-5 w-px bg-slate-900"></div>
-               <Lock size={20} />
+          <div className="mt-10 pt-8 border-t border-gray-50">
+             <p className="text-center text-[9px] font-bold text-gray-300 uppercase tracking-widest mb-4">Demo Profiles</p>
+             <div className="grid grid-cols-2 gap-3">
+                <button 
+                  onClick={() => quickLogin('admin')}
+                  className="flex items-center gap-2 p-3 rounded-xl bg-gray-50 border border-transparent hover:border-gray-100 transition-all group"
+                >
+                  <Building2 size={16} className="text-gray-400 group-hover:text-slate-900" />
+                  <span className="text-[9px] font-black uppercase text-gray-400 group-hover:text-slate-900">Admin</span>
+                </button>
+                <button 
+                  onClick={() => quickLogin('customer')}
+                  className="flex items-center gap-2 p-3 rounded-xl bg-gray-50 border border-transparent hover:border-gray-100 transition-all group"
+                >
+                  <HardHat size={16} className="text-gray-400 group-hover:text-slate-900" />
+                  <span className="text-[9px] font-black uppercase text-gray-400 group-hover:text-slate-900">Client</span>
+                </button>
              </div>
           </div>
         </div>
