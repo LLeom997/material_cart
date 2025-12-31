@@ -1,7 +1,6 @@
 
 import React, { useState, createContext, useContext, useEffect } from 'react';
 import * as reactRouterDom from 'react-router-dom';
-const { Routes, Route, Link, useLocation, useNavigate, Navigate } = reactRouterDom as any;
 import { EnquiryItem, Enquiry, OrderStatus, UserRole } from './types';
 import Home from './pages/Home';
 import Listing from './pages/Listing';
@@ -20,9 +19,12 @@ import {
   X,
   LogOut,
   ChevronRight,
-  User
+  User,
+  LayoutDashboard
 } from 'lucide-react';
 import { BUSINESS_PHONE } from './constants';
+
+const { Routes, Route, Link, useLocation, useNavigate, Navigate } = reactRouterDom as any;
 
 interface AppContextType {
   cart: EnquiryItem[];
@@ -71,7 +73,7 @@ const App: React.FC = () => {
     const currentUser = session?.user ?? null;
     setUser(currentUser);
     if (currentUser) {
-      const userRole = currentUser.email?.includes('admin') ? 'admin' : 'client';
+      const userRole: UserRole = currentUser.email?.includes('admin') ? 'ADMIN' : 'CLIENT_USER';
       setRole(userRole);
     } else {
       setRole(null);
@@ -95,7 +97,8 @@ const App: React.FC = () => {
         items: o.items,
         status: o.status as OrderStatus,
         createdAt: o.created_at,
-        adminNotes: o.admin_notes
+        adminNotes: o.admin_notes,
+        total_amount: o.total_amount
       }));
       setEnquiries(formatted);
     }
@@ -138,73 +141,94 @@ const App: React.FC = () => {
   return (
     <AppContext.Provider value={{ 
       cart, addToCart, updateCartQuantity, removeFromCart, clearCart, 
-      user, role, isAdmin: role === 'admin', signOut, enquiries, fetchEnquiries 
+      user, role, isAdmin: role === 'ADMIN', signOut, enquiries, fetchEnquiries 
     }}>
-      <div className="min-h-screen flex flex-col bg-brand-50 text-slate-900 font-sans tracking-tight">
-        <div role="complementary" className="bg-slate-900 text-white text-[10px] font-bold py-2 px-4 md:px-8 flex justify-between items-center tracking-wider z-[60]">
-          <div className="flex items-center gap-6">
-             <span className="opacity-70 uppercase">Regional Hub: Sangli</span>
-             {user && <span className="text-brand-500 uppercase">Role: {role}</span>}
-          </div>
-          <div className="flex items-center gap-4">
-            <a href={`tel:${BUSINESS_PHONE}`} className="flex items-center gap-1.5 hover:text-brand-500 transition-colors">
-              <Phone size={10} /> {BUSINESS_PHONE}
-            </a>
-          </div>
-        </div>
-
-        <header className="bg-white border-b sticky top-0 z-50 shadow-sm">
-          <div className="full-width-container mx-auto py-3 flex items-center justify-between gap-8">
-            <Link to="/" className="flex items-center gap-2.5 group shrink-0">
-              <div className="w-9 h-9 bg-slate-900 rounded-lg flex items-center justify-center text-brand-500 transition-all">
-                <ShieldCheck size={20} strokeWidth={2.5} />
+      <div className="min-h-screen flex flex-col bg-brand-50 text-slate-900 font-sans antialiased">
+        <header className="bg-white border-b sticky top-0 z-50 shadow-sm transition-all duration-300">
+          <div className="full-width-container mx-auto h-16 flex items-center justify-between gap-4">
+            <Link to="/" className="flex items-center gap-2 group">
+              <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-brand-500 group-hover:scale-105 transition-transform duration-300">
+                <ShieldCheck size={22} strokeWidth={2.5} />
               </div>
               <div className="flex flex-col -space-y-1">
-                <span className="text-xl font-black tracking-tighter uppercase">Material</span>
-                <span className="text-[8px] font-extrabold text-brand-600 tracking-[0.3em] uppercase">Cart</span>
+                <span className="text-xl font-black tracking-tighter uppercase text-slate-900">Material</span>
+                <span className="text-[9px] font-black text-brand-600 tracking-[0.3em] uppercase">Cart</span>
               </div>
             </Link>
 
-            <nav className="hidden lg:flex items-center gap-8 ml-auto">
-              {role === 'admin' ? (
-                <Link to="/admin" className="text-xs font-bold text-brand-600 hover:text-slate-900 transition-colors uppercase tracking-widest">Admin Desk</Link>
-              ) : (
-                <>
-                  <Link to="/listing" className="text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors uppercase tracking-widest">Catalog</Link>
-                  <Link to="/track" className="text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors uppercase tracking-widest">My Orders</Link>
-                </>
-              )}
-              <div className="h-4 w-px bg-slate-200"></div>
-              <div className="flex items-center gap-4">
-                <Link to="/enquiry" className="relative p-2 bg-slate-100 text-slate-900 rounded-xl hover:bg-brand-500 transition-all group">
-                  <ShoppingCart size={18} />
-                  {cart.length > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 bg-accent text-white text-[9px] font-black w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
-                      {cart.length}
-                    </span>
-                  )}
+            <nav className="hidden md:flex items-center gap-6">
+              <Link to="/listing" className="text-xs font-bold text-slate-500 hover:text-slate-900 uppercase tracking-widest transition-colors">Catalog</Link>
+              <Link to="/track" className="text-xs font-bold text-slate-500 hover:text-slate-900 uppercase tracking-widest transition-colors">Track Orders</Link>
+              {role === 'ADMIN' && (
+                <Link to="/admin" className="flex items-center gap-1.5 text-xs font-bold text-brand-600 hover:text-brand-700 uppercase tracking-widest bg-brand-50 px-3 py-1.5 rounded-lg border border-brand-100 transition-all">
+                  <LayoutDashboard size={14} /> Admin Desk
                 </Link>
-                
-                {user ? (
-                  <button onClick={signOut} className="flex items-center gap-2 pl-4 py-1 border-l border-slate-100">
-                    <div className="w-7 h-7 rounded-full bg-slate-900 flex items-center justify-center text-brand-500 font-bold text-[10px] uppercase">
-                      {user.email?.[0]}
-                    </div>
-                    <LogOut size={16} className="text-slate-300 hover:text-accent transition-colors cursor-pointer" />
-                  </button>
-                ) : (
-                  <Link to="/auth" className="text-[10px] font-black uppercase tracking-widest text-slate-900 border border-slate-900 px-4 py-2 rounded-lg hover:bg-slate-900 hover:text-white transition-all">
-                    Sign In
-                  </Link>
-                )}
-              </div>
+              )}
             </nav>
 
-            <button className="lg:hidden p-2 text-slate-600" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+            <div className="flex items-center gap-3">
+              <Link to="/enquiry" className="relative p-2.5 bg-slate-100 text-slate-900 rounded-xl hover:bg-brand-500 transition-all group active:scale-95">
+                <ShoppingCart size={20} />
+                {cart.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-accent text-white text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full border-2 border-white shadow-sm">
+                    {cart.length}
+                  </span>
+                )}
+              </Link>
+
+              <div className="h-6 w-px bg-slate-200 hidden sm:block"></div>
+
+              {user ? (
+                <div className="flex items-center gap-3">
+                  <div className="hidden sm:block text-right">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Welcome</p>
+                    <p className="text-xs font-bold text-slate-900 truncate max-w-[120px]">{user.email}</p>
+                  </div>
+                  <button onClick={signOut} className="p-2.5 bg-slate-50 text-slate-400 hover:text-accent hover:bg-accent/5 rounded-xl transition-all group">
+                    <LogOut size={20} className="group-hover:translate-x-0.5 transition-transform" />
+                  </button>
+                </div>
+              ) : (
+                <Link to="/auth" className="text-[10px] font-black uppercase tracking-widest text-slate-900 bg-white border-2 border-slate-900 px-5 py-2.5 rounded-xl hover:bg-slate-900 hover:text-white transition-all active:scale-95 shadow-sm">
+                  Sign In
+                </Link>
+              )}
+
+              <button className="md:hidden p-2 text-slate-900" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+                {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+            </div>
           </div>
         </header>
+
+        {/* Mobile Navigation */}
+        {isMobileMenuOpen && (
+          <div className="fixed inset-0 z-[100] bg-white md:hidden animate-slideInLeft p-6 flex flex-col">
+            <div className="flex justify-between items-center mb-10">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-brand-500">
+                  <ShieldCheck size={18} />
+                </div>
+                <span className="text-lg font-black uppercase text-slate-900">MaterialCart</span>
+              </div>
+              <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 border rounded-full"><X size={20}/></button>
+            </div>
+            <nav className="flex flex-col gap-8 flex-grow">
+              <Link to="/listing" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black uppercase tracking-tighter text-slate-900 border-b pb-4">Browse Catalog</Link>
+              <Link to="/track" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black uppercase tracking-tighter text-slate-900 border-b pb-4">Track Orders</Link>
+              {role === 'ADMIN' && (
+                <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black uppercase tracking-tighter text-brand-600 border-b pb-4">Admin Dashboard</Link>
+              )}
+            </nav>
+            <div className="mt-auto pt-8 border-t flex items-center justify-between">
+              {user ? (
+                 <button onClick={signOut} className="flex items-center gap-2 text-slate-400 font-bold uppercase text-xs tracking-widest"><LogOut size={16}/> Sign Out</button>
+              ) : (
+                <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)} className="bg-slate-900 text-white px-8 py-4 rounded-2xl w-full text-center font-black uppercase tracking-widest text-xs">Sign In</Link>
+              )}
+            </div>
+          </div>
+        )}
 
         <main id="main-content" className="flex-grow">
           <Routes>
@@ -213,11 +237,49 @@ const App: React.FC = () => {
             <Route path="/enquiry" element={<EnquiryPage />} />
             <Route path="/track" element={<TrackOrder />} />
             <Route path="/auth" element={<AuthPage />} />
-            <Route path="/admin" element={role === 'admin' ? <AdminDashboard /> : <Navigate to="/auth" />} />
+            <Route path="/admin" element={role === 'ADMIN' ? <AdminDashboard /> : <Navigate to="/auth" />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
           </Routes>
         </main>
+
+        <footer className="bg-white border-t py-12 px-6">
+           <div className="full-width-container mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
+              <div className="col-span-1 md:col-span-2">
+                <div className="flex items-center gap-2 mb-6">
+                  <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-brand-500"><ShieldCheck size={18} /></div>
+                  <span className="text-lg font-black uppercase text-slate-900">MaterialCart</span>
+                </div>
+                <p className="text-slate-500 font-medium max-w-sm mb-6 leading-relaxed">Industrialized structural materials marketplace for Sangli District. Graded quality, Mandi price parity, and localized logistics.</p>
+                <div className="flex items-center gap-6">
+                   <a href={`tel:${BUSINESS_PHONE}`} className="flex items-center gap-2 text-slate-900 font-bold hover:text-brand-600 transition-colors"><Phone size={14}/> {BUSINESS_PHONE}</a>
+                </div>
+              </div>
+              <div>
+                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-6">Market Hub</h4>
+                <ul className="space-y-4">
+                  <li><Link to="/listing" className="text-sm font-bold text-slate-900 hover:text-brand-600">Full Catalog</Link></li>
+                  <li><Link to="/track" className="text-sm font-bold text-slate-900 hover:text-brand-600">Track Order</Link></li>
+                  <li><Link to="/about" className="text-sm font-bold text-slate-900 hover:text-brand-600">Our Story</Link></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-6">Supply Chain</h4>
+                <ul className="space-y-4">
+                  <li><Link to="/auth" className="text-sm font-bold text-slate-900 hover:text-brand-600">Vendor Portal</Link></li>
+                  <li><Link to="/contact" className="text-sm font-bold text-slate-900 hover:text-brand-600">Partner with us</Link></li>
+                  <li><Link to="/contact" className="text-sm font-bold text-slate-900 hover:text-brand-600">Support Desk</Link></li>
+                </ul>
+              </div>
+           </div>
+           <div className="full-width-container mx-auto mt-12 pt-8 border-t flex flex-col md:flex-row justify-between items-center gap-4">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">© 2024 MaterialCart Sangli. All Rights Reserved.</p>
+              <div className="flex items-center gap-6">
+                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ISO 9001:2015 Verified</span>
+                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Privacy Policy</span>
+              </div>
+           </div>
+        </footer>
       </div>
     </AppContext.Provider>
   );

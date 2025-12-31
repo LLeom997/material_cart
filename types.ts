@@ -3,11 +3,35 @@ export enum OrderStatus {
   PENDING = 'Pending',
   CALLED = 'Called',
   CONFIRMED = 'Confirmed',
+  SHIPPED = 'Shipped',
   DELIVERED = 'Delivered',
   CANCELLED = 'Cancelled'
 }
 
-export type UserRole = 'admin' | 'client';
+export type UserRole = 
+  | 'MASTER_ADMIN' 
+  | 'ADMIN' 
+  | 'MANAGER' 
+  | 'ACCOUNTANT' 
+  | 'STOCK_OPS' 
+  | 'SUPPLIER_USER' 
+  | 'CLIENT_USER' 
+  | 'DELIVERY_PARTNER';
+
+export interface Profile {
+  id: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  role: string;
+  created_at: string;
+}
+
+export interface City {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 export interface Category {
   id: string;
@@ -17,9 +41,17 @@ export interface Category {
   description: string;
 }
 
-export interface Specification {
-  label: string;
-  value: string;
+export interface SupplierPerformance {
+  deliverySuccessRate: number;
+  qualityRating: number;
+  speedRank: number;
+}
+
+export interface LogisticsPartner {
+  id: string;
+  name: string;
+  base_rate: number;
+  per_km_rate: number;
 }
 
 export interface Vendor {
@@ -30,17 +62,8 @@ export interface Vendor {
   email?: string;
   address?: string;
   rating?: number;
-}
-
-export interface PurchaseBatch {
-  id: string;
-  product_id: string;
-  vendor_id: string;
-  quantity_purchased: number;
-  quantity_remaining: number;
-  unit_price: number;
-  purchased_at: string;
-  vendor_name?: string;
+  isActive: boolean;
+  performance?: SupplierPerformance;
 }
 
 export interface Product {
@@ -49,35 +72,36 @@ export interface Product {
   categoryName?: string;
   categorySlug?: string;
   vendorId?: string;
-  subCategory?: string;
   name: string;
-  priceRange: string;
-  originalPrice?: string;
-  discountLabel?: string;
+  price_range: string;
   uom: string;
   image: string;
   description: string;
-  specifications: Specification[];
+  specifications: { label: string; value: string }[];
   brand?: string;
   stock_quantity?: number;
-  rating?: number;
-  ratingCount?: number;
+  gst_percentage: number;
+  sku?: string;
 }
 
-export interface LedgerSummary {
-  product_id: string;
-  name: string;
-  uom: string;
-  total_pieces_purchased: number;
-  total_pieces_remaining: number;
-  total_pieces_sold: number;
-  average_purchase_price: number;
-}
-
-export interface City {
+export interface LedgerEntry {
   id: string;
-  name: string;
-  slug: string;
+  order_id: string;
+  type: 'PURCHASE' | 'SALE' | 'LOGISTICS' | 'GST';
+  amount: number;
+  gst_amount: number;
+  margin: number;
+  created_at: string;
+  notes?: string;
+}
+
+export interface AuditLog {
+  id: string;
+  user_id?: string;
+  action: string;
+  resource: string;
+  metadata: any;
+  created_at: string;
 }
 
 export interface EnquiryItem {
@@ -85,6 +109,7 @@ export interface EnquiryItem {
   productName: string;
   quantity: number;
   uom: string;
+  price?: number;
 }
 
 export interface Enquiry {
@@ -98,4 +123,5 @@ export interface Enquiry {
   status: OrderStatus;
   createdAt: string;
   adminNotes?: string;
+  total_amount?: number;
 }

@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import * as reactRouterDom from 'react-router-dom';
-const { Link, useNavigate } = reactRouterDom as any;
 import { CITIES, CATEGORIES, BUSINESS_PHONE } from '../constants';
 import * as Icons from 'lucide-react';
 
-// Fix: Use default function export to ensure the compiler correctly identifies the module's default export
+const { Link, useNavigate } = reactRouterDom as any;
+
 export default function Home() {
   const [selectedCity, setSelectedCity] = useState(CITIES[0].slug);
   const navigate = useNavigate();
@@ -73,7 +72,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Supply Verticals - Optimized typography & Mobile density */}
+      {/* Supply Verticals */}
       <section className="bg-white py-12 md:py-20 border-b border-slate-50">
         <div className="max-w-[1440px] mx-auto px-4 md:px-12">
           <div className="flex justify-between items-center mb-10">
